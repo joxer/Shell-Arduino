@@ -1,0 +1,5 @@
+Shell-Arduino is a naive implementation of a shell on the arduino.
+It's tested only with the atmel328. I don't know if it will works on other uC.
+If you have tested it, please report your experince me by an email.
+
+Diego Candido aka joxer < diego.luca.candido@gmail.com >
