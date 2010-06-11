@@ -1,3 +1,6 @@
+// 0.2 ALPHA
+
+
 /* Copyright (C) 2010 by Diego Candido < diego.luca.candido@gmail.com >
 
   This file is part of Shell-arduino
