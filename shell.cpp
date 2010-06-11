@@ -41,6 +41,7 @@ void setPin(int pin, int value, int){
  
  
   if(pin > 0 && pin < 14 && value >= 0 && value <= 255){
+    
     pinMode(pin, OUTPUT);
     digitalWrite(pin, value);
     
@@ -93,12 +94,14 @@ void createPwm(int pin , int value , int){
 }
 
 void showStatus(int,int,int){
-
+  int ii;
   for(int i = 2; i < 14;i++){
     Serial.print("PORT ");
     Serial.print(i);
     Serial.print(": ");
-    Serial.println(digitalRead(i), DEC);
+    if(i == 3 || i == 5 || i == 6|| i ==9 || i==10 || i == 11) ii = analogRead(i);
+    else ii = digitalRead(i);
+    Serial.println(ii, DEC);
 
   }
   
@@ -114,7 +117,7 @@ void showStatus(int,int,int){
 void help(int,int,int){
 
   Serial.flush();
-  Serial.println("HELP!");
+  Serial.println("HELP: {\n\tping number_pin\n\tsetp  number_pin value\n\trdpin number_pin {times}\n\trapin number_pin {times}\n\tpwm pin_number value\n\tstatus\n\thelp\n}");
 
 
 }
@@ -165,7 +168,7 @@ int ArduinoShell::getChoice(){
   Serial.flush();
   delay(50);
   char phrase[12];
-  memset(phrase, ' ', 12);
+  memset(phrase, '\0', 12);
   int i = 0;
   
   while(1){
@@ -173,13 +176,14 @@ int ArduinoShell::getChoice(){
       
       phrase[i] = Serial.read();
       
+      
       i++;
       
     }
-    else{
+    else if(Serial.available() == 0)
       break;
-    }
   }
+
   
   Serial.flush();
   if(i != 0){
