@@ -102,7 +102,7 @@ void showStatus(int,int,int){
     if(i == 3 || i == 5 || i == 6|| i ==9 || i==10 || i == 11) ii = analogRead(i);
     else ii = digitalRead(i);
     Serial.println(ii, DEC);
-
+    delay(5);
   }
   
   
@@ -111,13 +111,14 @@ void showStatus(int,int,int){
     Serial.print(i);
     Serial.print(": ");
     Serial.println(analogRead(i), DEC);
+    delay(5);
   }
 }
   
 void help(int,int,int){
 
   Serial.flush();
-  Serial.println("HELP: {\n\tping number_pin\n\tsetp  number_pin value\n\trdpin number_pin {times}\n\trapin number_pin {times}\n\tpwm pin_number value\n\tstatus\n\thelp\n}");
+  Serial.println("HELP: {\r\n\tping number_pin\r\n\tsetp  number_pin value\r\n\trdpin number_pin {times}\r\n\trapin number_pin {times}\r\n\tpwm pin_number value\r\n\tstatus\r\n\thelp\n}");
 
 
 }
@@ -143,7 +144,13 @@ void monitor(int pin,int time,int){
 
 ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
   
- 
+  Serial.begin(bauds);
+  Serial.flush();
+  delay(50);
+  Serial.println("Arduino-Shell by Diego Candido < diego.luca.candido@gmail.com >\r\nWrite help for commands");
+  delay(20);
+  Serial.flush();
+  Serial.end();
   
   commands[0].com = "status";
   commands[0].cmd = showStatus;
@@ -167,12 +174,13 @@ int ArduinoShell::getChoice(){
   Serial.begin(bauds);
   Serial.flush();
   delay(50);
-  char phrase[12];
-  memset(phrase, '\0', 12);
+  char phrase[25];
+  memset(phrase, '\0', 25);
   int i = 0;
   Serial.print("Arduino~: ");
+  delay(50);
   while(1){
-    if(i < 12 && Serial.available() > 0){
+    if(i < 25 && Serial.available() > 0){
       
       phrase[i] = Serial.read();
       Serial.print(phrase[i]);
@@ -181,27 +189,41 @@ int ArduinoShell::getChoice(){
 	break;
       }
       
-      i++;
-      
-    }
-    else if(i == 12)
-      break;
-  }
+      if(phrase[i] == 127 && i > 0){
+	i--;
+	Serial.print(byte(8));
+	Serial.print(' ');
+	Serial.print(byte(8));
+      }
+      else if(phrase[i] == 127 && i == 0)
+	;
+       else if(i > -1){
+
+	 i++;
+       }
+     }
+     else if(i == 25){
+       Serial.println("");
+       Serial.print("ERROR -- TOO MUCH CHARACTER FOR COMMAND");
+       break;
+     }
+   }
   
-  Serial.println("");
-  delay(1);
-  Serial.flush();
-  if(i != 0){
-    
-    int n = dispatch(phrase);
-    if(n == -1)
-      Serial.println("error string");
+   Serial.println("");
+   delay(10);
+   Serial.flush();
+   if(i != 0 && i < 25){
+
+     int n = dispatch(phrase);
+     if(n == -1)
+       Serial.println("error string");
     else if(n == 0)
       Serial.println("--- Ok!");
     else if(n == 1)
       Serial.println("command not found");
   }
   Serial.flush();
+  delay(10);
   Serial.end();
 }
 int ArduinoShell::dispatch(char choice[12]){
