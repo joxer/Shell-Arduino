@@ -170,21 +170,26 @@ int ArduinoShell::getChoice(){
   char phrase[12];
   memset(phrase, '\0', 12);
   int i = 0;
-  
+  Serial.print("Arduino~: ");
   while(1){
     if(i < 12 && Serial.available() > 0){
       
       phrase[i] = Serial.read();
-      
+      Serial.print(phrase[i]);
+      if(phrase[i] == ';' || phrase[i] == 13){
+	phrase[i] = ' ';
+	break;
+      }
       
       i++;
       
     }
-    else if(Serial.available() == 0)
+    else if(i == 12)
       break;
   }
-
   
+  Serial.println("");
+  delay(1);
   Serial.flush();
   if(i != 0){
     
