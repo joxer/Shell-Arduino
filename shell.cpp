@@ -22,22 +22,8 @@
  */
 #include "shell.h"
 #include <stdlib.h>
+#include "list.h"
 
-void pingLed(int pin, int , int){
-  if(pin != 0 && pin < 14){
-    pinMode(pin, OUTPUT);
-    Serial.println("ping");
-    digitalWrite(pin, HIGH);
-    delay(1000);
-    digitalWrite(pin, LOW);
-  }
-  else{
-    
-    Serial.write("--- ERROR pin choice");
-
-  }
-  
-}
 
 
 void setPin(int pin, int value, int){
@@ -155,10 +141,12 @@ ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
   Serial.flush();
   Serial.end();
   
+  first = NULL;
+  
   commands[0].com = "status";
   commands[0].cmd = showStatus;
   commands[1].com = "ping";
-  commands[1].cmd = pingLed;
+  commands[1].cmd = NULL;
   commands[2].com = "setp";
   commands[2].cmd = setPin;
   commands[3].com = "rdpin";
@@ -171,6 +159,31 @@ ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
   commands[6].cmd = help;
   commands[7].com = "monitor";
   commands[7].cmd = monitor;
+}
+
+void ArduinoShell::addFunction(char* name, functor cmd){
+  
+  
+  if(first == NULL){
+
+    first = (Node*)malloc(sizeof(Node));
+    first->getData()->cmd = cmd;
+    first->getData()->com = name;
+    first->setNext(NULL);
+  }
+  else{
+    Node *nn = NULL;
+
+    for(nn = first; nn->getNext() != NULL;nn = nn->getNext());
+    
+    Node *kk = (Node*)malloc(sizeof(Node));
+    kk->getData()->cmd = cmd;
+    kk->getData()->com = name;
+    kk->setNext(NULL);
+    nn->setNext(kk);
+
+  }
+  
 }
 
 int ArduinoShell::getChoice(){
@@ -237,12 +250,12 @@ int ArduinoShell::dispatch(char choice[12]){
   third_t = strtok(NULL, " ");
   fourth_t = strtok(NULL, " ");
   // it's a better choice to implement the control inside function 'cause it's possible that there aren't other token
-  
-  for(int i = 0; i < 8;i++){
+  Node* tmp;
+  for(tmp = first; tmp != NULL ; tmp = tmp->getNext()){
     
-    if(strcmp(first_t,commands[i].com) == 0){
+    if(strcmp(first_t,tmp->getData()->com) == 0){
       
-      commands[i].cmd(atoi(second_t), atoi(third_t), atoi(fourth_t));
+      tmp->getData()->cmd(atoi(second_t), atoi(third_t), atoi(fourth_t));
       return 0;
     }
   }
