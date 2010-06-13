@@ -18,24 +18,34 @@
 
  */
 
-#ifndef SHELL_HPP
-#define SHELL_HPP
+#ifndef FUNCTOR
+#define FUNCTOR
+typedef void (*functor)(int,int,int);
+struct cmd{ 
+  char* com;
+  functor cmd;
+  };
+
+#endif
+
+
 #include <string.h>
 #include <WProgram.h> 
+#include <list.h>
+
+#ifndef SHELL_HPP
+#define SHELL_HPP
 
 
 
 
 class ArduinoShell {
-  struct cmd{ 
-  char* com;
-    void (*cmd)(int,int,int) ;
-};
+  Node *first;
   int bauds;
   cmd commands[7];
  public:
   ArduinoShell(int);
-  
+  void addFunction(char*, functor);
   int getChoice();
  private:
   int dispatch(char[]);
