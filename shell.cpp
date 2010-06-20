@@ -1,5 +1,3 @@
-// 0.2 ALPHA
-
 
 /* Copyright (C) 2010 by Diego Candido < diego.luca.candido@gmail.com >
 
@@ -25,112 +23,6 @@
 #include "list.h"
 
 
-
-void setPin(int pin, int value, int){
- 
- 
-  if(pin > 0 && pin < 14 && value >= 0 && value <= 255){
-    
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, value);
-    
-  }
-  else{
-    
-    Serial.write("--- ERROR pin choice OR value choice");
-
-  }
-}
-
-void readDigitalPin(int pin, int times,int){
-  if(pin > 1 && pin < 14){
-    if(times == 0) times = 1;
-    for(int i = 0; i < times;i++)
-      Serial.println(digitalRead(pin), DEC);
-  }
-  else{
-    
-    Serial.write("--- ERROR pin choice");
-
-  }
-}
-
-void readAnalogPin(int pin, int times, int){
-  if(pin > -1 && pin < 6){
-    if(times == 0) times = 1;
-    for(int i = 0; i < times;i++)
-      Serial.println(analogRead(pin),DEC);
-  }
-  else{
-    
-    Serial.write("--- ERROR pin choice");
-
-  }
-}
-
-void createPwm(int pin , int value , int){
-  if(pin > 1 && pin < 14){
-    pinMode(pin, OUTPUT);
-    analogWrite(pin,value);
-  }
-  else{
-    
-    Serial.write("--- ERROR pin choice");
-
-  }
-  
-  
-}
-
-void showStatus(int,int,int){
-  int ii;
-  for(int i = 2; i < 14;i++){
-    Serial.print("PORT ");
-    Serial.print(i);
-    Serial.print(": ");
-    if(i == 3 || i == 5 || i == 6|| i ==9 || i==10 || i == 11) ii = analogRead(i);
-    else ii = digitalRead(i);
-    Serial.println(ii, DEC);
-    delay(5);
-  }
-  
-  
-  for(int i = 0; i < 6;i++){
-    Serial.print("PORT ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println(analogRead(i), DEC);
-    delay(5);
-  }
-}
-  
-void help(int,int,int){
-
-  Serial.flush();
-  Serial.println("HELP: {\r\n\tping number_pin\r\n\tsetp  number_pin value\r\n\trdpin number_pin {times}\r\n\trapin number_pin {times}\r\n\tpwm pin_number value\r\n\tstatus\r\n\thelp\n}");
-
-
-}
-
-void monitor(int pin,int time,int){
-
-  if(pin > 1 && pin < 14){
-    if(time == 0 || time < 10) time = 10;
-    pinMode(pin, INPUT);
-    int origin_value = digitalRead(pin);
-    for(int i = 0; i < time;i+= time/10)
-      if(digitalRead(pin) != origin_value) {
-	Serial.print("changed status to:");
-	Serial.println(i);
-	break;
-      }
-    Serial.println("nothing happens");
-  }
-  else{
-    Serial.write("--- ERROR pin choice");
-  }
-}
-
 ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
   
   Serial.begin(bauds);
@@ -143,22 +35,6 @@ ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
   
   first = NULL;
   
-  commands[0].com = "status";
-  commands[0].cmd = showStatus;
-  commands[1].com = "ping";
-  commands[1].cmd = NULL;
-  commands[2].com = "setp";
-  commands[2].cmd = setPin;
-  commands[3].com = "rdpin";
-  commands[3].cmd = readDigitalPin;
-  commands[4].com = "rapin";
-  commands[4].cmd = readAnalogPin;
-  commands[5].com = "pwm";
-  commands[5].cmd = createPwm;
-  commands[6].com = "help";
-  commands[6].cmd = help;
-  commands[7].com = "monitor";
-  commands[7].cmd = monitor;
 }
 
 void ArduinoShell::addFunction(char* name, functor cmd){
