@@ -24,6 +24,8 @@
 
 
 ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
+
+  memset(variables, '0', sizeof(char)*6);
   
   Serial.begin(bauds);
   Serial.flush();
@@ -114,29 +116,90 @@ int ArduinoShell::getChoice(){
     else if(n == 1)
       Serial.println("command not found");
   }
+
   Serial.flush();
   delay(10);
   Serial.end();
 }
 int ArduinoShell::dispatch(char choice[12]){
   
+  
   char *first_t, *second_t, *third_t, *fourth_t;
   first_t = strtok(choice, " ");
   second_t = strtok(NULL, " ");
   third_t = strtok(NULL, " ");
   fourth_t = strtok(NULL, " ");
+ 
+  
+  if(*first_t == '$'){
+    int i;
+     for( i = 0; i < 6;i++){
+     
+      if(variables[i] == *second_t){
+	
+	Serial.print(variables[i]);
+	Serial.print(" = ");
+	Serial.println(values[i], DEC);
+	break;
+      }
+      
+     }
+     if(i == 6){
+
+       Serial.println("Variabile not found");
+       return 2;
+     }
+     return 0;
+  }
+   //storing a variable into memory (not the eeeprom!)
+  else if(*first_t == '=' && *second_t >= 97 && *second_t <= 122){
+    int i;
+    for(i = 0; i < 6;i++){
+      if(variables[i] == '0'){
+	for(int j = 0; j < i;j++)
+	  if(*second_t == variables[j]){
+	    Serial.println("Variable already stored!");
+	    return 0;
+	  }
+	values[i] = atoi(third_t);
+	variables[i] = *second_t;
+	break;
+      }
+    }
+    
+    if(i == 6){
+
+      Serial.write("no more space available");
+      return 2;
+    }
+    return 0;
+  }
+  else{
   // it's a better choice to implement the control inside function 'cause it's possible that there aren't other token
   Node* tmp;
+
+  int first_a = atoi(second_t), second_a = atoi(third_t), third_a = atoi(fourth_t);
+  
   for(tmp = first; tmp != NULL ; tmp = tmp->getNext()){
+    
+    for(int i = 0; i < 6;i++){
+      
+      if(*second_t == variables[i])
+	first_a = values[i];
+      if(*third_t == variables[i])
+	second_a = values[i];
+      if(*fourth_t == variables[i])
+	third_a = values[i];
+    }
     
     if(strcmp(first_t,tmp->getData()->com) == 0){
       
-      tmp->getData()->cmd(atoi(second_t), atoi(third_t), atoi(fourth_t));
+      tmp->getData()->cmd(first_a, second_a, third_a);
       return 0;
     }
   }
   return 1;
   
-  
+  }
 }
 

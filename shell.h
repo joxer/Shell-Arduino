@@ -43,6 +43,8 @@ class ArduinoShell {
   Node *first;
   int bauds;
   cmd commands[7];
+  char variables[6];
+  int values[6];
  public:
   ArduinoShell(int);
   void addFunction(char*, functor);
