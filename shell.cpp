@@ -53,6 +53,32 @@ void setPin(int pin, int value, int){
   }
 }
 
+void readDistance(int , int , int){
+
+   float j;
+
+  // Apply reverse voltage, charge up the pin and led capacitance
+  pinMode(2,OUTPUT);
+  pinMode(3,OUTPUT);
+  digitalWrite(2,HIGH);
+  digitalWrite(3,LOW);
+
+  // Isolate the pin 2 end of the diode
+  pinMode(2,INPUT);
+  
+  
+  digitalWrite(2,LOW);  // turn off internal pull-up resistor
+
+  // Count how long it takes the diode to bleed back down to a logic zero
+  for ( j = 0; j < 50000; j++) {
+    if ( digitalRead(2)==0) break;
+  }
+ 
+  Serial.println(j/50000.0);
+ 
+}
+
+
 void readDigitalPin(int pin, int times,int){
   if(pin > 1 && pin < 14){
     if(times == 0) times = 1;
@@ -118,7 +144,8 @@ void showStatus(int,int,int){
 void help(int,int,int){
 
   Serial.flush();
-  Serial.println("HELP: {\r\n\tping number_pin\r\n\tsetp  number_pin value\r\n\trdpin number_pin {times}\r\n\trapin number_pin {times}\r\n\tpwm pin_number value\r\n\tstatus\r\n\thelp\n}");
+  Serial.println("HELP: {\r\n\tping number_pin\r\n\tsetp  number_pin value\r\n\trdpin number_pin {times}\r\n\tdistance number_pin number_pin
+\r\n\trapin number_pin {times}\r\n\tpwm pin_number value\r\n\tstatus\r\n\thelp\n}");
 
 
 }
@@ -168,6 +195,10 @@ ArduinoShell::ArduinoShell(int _bauds): bauds(_bauds){
   commands[6].cmd = help;
   commands[7].com = "monitor";
   commands[7].cmd = monitor;
+  commands[7].com = "distance";
+  commands[7].cmd = readDistance;
+  
+  
 }
 
 int ArduinoShell::getChoice(){
